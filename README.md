@@ -329,3 +329,7 @@ npm run lint          # ESLint + Prettier check
 npm run build         # tsup → dist (ESM + CJS + .d.ts + bones.css)
 npm run storybook     # interactive examples
 ```
+
+## AI disclosure
+
+The library source in `src/` is hand-written. The more complex TypeScript types, tests, stories, code comments, and this README were written with AI assistance.
