@@ -332,4 +332,4 @@ npm run storybook     # interactive examples
 
 ## AI disclosure
 
-The library source in `src/` is hand-written. The more complex TypeScript types, tests, stories, code comments, and this README were written with AI assistance.
+I wrote the core logic by hand — `createSkeleton.tsx`, `renameProps.tsx`, the hooks and bones. The trickier type-level code in `types.ts`, the tests, stories, code comments, and this README were drafted with AI assistance and reviewed before merging.
