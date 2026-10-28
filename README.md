@@ -2,6 +2,8 @@
 
 Skeleton loading for React 19, defined once.
 
+[Live Storybook](https://gabrielecorti.github.io/skully/)
+
 Without skully, you write every loading state by hand:
 
 ```tsx
