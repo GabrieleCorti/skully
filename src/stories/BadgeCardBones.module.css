@@ -1,0 +1,135 @@
+/* Bones and content share .frame, so nothing shifts on reveal. */
+
+.frame {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+  height: 148px;
+  padding: 18px 20px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #e3e1ee;
+  font-family: system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-right: 64px; /* keep clear of the ribbon */
+}
+
+/* The visible badge: real text, shown by both bones and content. */
+.ribbon {
+  position: absolute;
+  top: 14px;
+  right: -30px;
+  width: 110px;
+  padding: 3px 0;
+  background: #6c5ce7;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(35deg);
+  box-shadow: 0 2px 6px rgb(60 40 160 / 0.3);
+}
+
+/* ---- Bones ---- */
+
+.bones {
+  /* Anti-flash: reserve layout immediately, fade in only if loading takes a while. */
+  animation: fade-in 200ms ease-out 150ms both;
+}
+
+.bone {
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ecebf3 0%, #f7f6fb 50%, #ecebf3 100%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.boneIcon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.boneTitle {
+  width: 55%;
+  height: 16px;
+}
+
+.boneLine {
+  height: 12px;
+}
+
+.boneLine:last-child {
+  width: 70%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bones,
+  .bone {
+    animation: none;
+  }
+}
+
+/* ---- Content ---- */
+
+.card {
+  color: #2d2650;
+}
+
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ece9fd;
+  font-size: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.text {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #555;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}

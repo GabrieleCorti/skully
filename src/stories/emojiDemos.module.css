@@ -1,0 +1,26 @@
+.variation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.code {
+  margin: 0;
+  color: #6c5ce7;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.mintTheme {
+  --emoji-bones-bg: #c9f5e2;
+  --emoji-bones-strip: #17b085;
+  --emoji-bones-duration: 7s;
+  --emoji-bones-gap: 18px;
+}
+
+.midnightTheme {
+  --emoji-bones-bg: #2a1740;
+  --emoji-bones-strip: #ff5fa8;
+  --emoji-bones-duration: 14s;
+}

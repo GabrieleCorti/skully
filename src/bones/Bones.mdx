@@ -1,0 +1,61 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Skully/Bones/Overview" />
+
+# Default bones
+
+The `skully` core ships no styles. The optional `skully/bones` entry point adds three small
+placeholder primitives for building your bones. They are stateless and server-renderable, and come
+with a stylesheet you import once:
+
+```tsx
+import { Circle, Line, Rect } from 'skully/bones'
+import 'skully/bones.css' // once, anywhere in your app
+```
+
+| Primitive | Default size                                        | Typical use          |
+| --------- | --------------------------------------------------- | -------------------- |
+| `Line`    | full width × one line box (`1lh`), with a `1em` bar | text lines, titles   |
+| `Circle`  | 2.5em × 2.5em                                       | avatars, icons       |
+| `Rect`    | 100% × 6em                                          | images, media, cards |
+
+Each renders a `<span aria-hidden="true">` and accepts every native `span` prop (`className`,
+`ref`, `data-*`…). There are no size props: size them with your own `className`. All rules
+live in `@layer skully`, so any class of yours wins regardless of specificity or import order.
+
+## Sizing a `Line`
+
+A `Line` is exactly one line of text tall: its height is the line box (`1lh`) of its own
+typography, and it draws a bar centred inside it. N `Line`s take the same height as the N lines of
+text they replace, so you don't have to tune margins.
+
+- To match the line box, give the `Line` the same `font-size` and `line-height` as the text it
+  replaces, for example by reusing the text's class: `<Line className={styles.bio} />`.
+- Set `width` in your `className` (default `100%`).
+- Set the bar thickness with `--sk-line-thickness` (default `1em`). The bar never grows taller
+  than the line box.
+
+Setting `height` on a `Line` changes the line box, not the bar. See
+[Line / Line height matches text](?path=/story/skully-bones-line--line-height-matches-text) for a
+side-by-side check that runs in the browser.
+
+## Theming
+
+Set these custom properties on `:root` or on any ancestor:
+
+| Property              | Default               | Controls                                        |
+| --------------------- | --------------------- | ----------------------------------------------- |
+| `--sk-color`          | 12% of `currentColor` | base colour                                     |
+| `--sk-highlight`      | 5% of `currentColor`  | shimmer highlight                               |
+| `--sk-radius`         | `4px`                 | corner radius of the `Line` bar and `Rect`      |
+| `--sk-duration`       | `1.4s`                | one shimmer cycle                               |
+| `--sk-delay`          | `150ms`               | anti-flash fade-in delay                        |
+| `--sk-line-thickness` | `1em`                 | thickness of the `Line` bar, capped at line box |
+
+The default colours are mixed from the text colour
+(`color-mix(in srgb, currentColor 12%, transparent)`), so the bones follow your theme on light and
+dark backgrounds without any configuration (see
+[Line / Light and dark backgrounds](?path=/story/skully-bones-line--light-and-dark-backgrounds)).
+Set `--sk-color` and `--sk-highlight` to use fixed colours instead.
+
+Under `prefers-reduced-motion: reduce` the shimmer and the fade-in are disabled.

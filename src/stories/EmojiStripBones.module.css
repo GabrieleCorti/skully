@@ -1,0 +1,225 @@
+/*
+ * Theming hooks (set them on any ancestor):
+ *   --emoji-bones-bg        box background         (default: soft pink)
+ *   --emoji-bones-strip     diagonal strip colour  (default: hot pink)
+ *   --emoji-bones-duration  one marquee loop at speed="normal" (default: 10s)
+ *   --emoji-bones-gap       space between strips   (default: 10px / 12px / 14px for sm / md / lg)
+ * Bones and content share the same size classes, so nothing shifts on reveal.
+ */
+
+.frame {
+  box-sizing: border-box;
+  width: var(--_width);
+  height: var(--_height);
+  border-radius: 20px;
+  font-family: system-ui, sans-serif;
+}
+
+/* ---- Sizes (shared by bones and content) ---- */
+
+.sm {
+  --_width: 220px;
+  --_height: 124px;
+  --_emoji-size: 20px;
+  --_gap: 10px;
+  --_clamp: 2;
+}
+
+.md {
+  --_width: 300px;
+  --_height: 168px;
+  --_emoji-size: 26px;
+  --_gap: 12px;
+  --_clamp: 3;
+}
+
+.lg {
+  --_width: 380px;
+  --_height: 212px;
+  --_emoji-size: 32px;
+  --_gap: 14px;
+  --_clamp: 4;
+}
+
+/* ---- Speeds: multipliers of --emoji-bones-duration ---- */
+
+.slow {
+  --_speed: 1.8;
+}
+
+.normal {
+  --_speed: 1;
+}
+
+.fast {
+  --_speed: 0.45;
+}
+
+/* ---- Bones ---- */
+
+.bones {
+  composes: frame;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 12%, rgb(255 255 255 / 0.7), transparent 55%),
+    radial-gradient(circle at 85% 90%, rgb(255 255 255 / 0.35), transparent 45%),
+    var(--emoji-bones-bg, #ffc8e1);
+  box-shadow: inset 0 0 0 1px rgb(214 51 132 / 0.18);
+
+  /* Anti-flash: reserve layout immediately, fade in only if loading takes a while. */
+  animation: fade-in 200ms ease-out 150ms both;
+}
+
+/* One rotated container holds all strips, so they stay parallel with an even gap. */
+.bands {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--emoji-bones-gap, var(--_gap));
+  /* Wider than the box so the rotated strips reach every corner; extra strips are clipped. */
+  width: 180%;
+  font-size: var(--_emoji-size);
+  transform: translate(-50%, -50%) rotate(-20deg);
+}
+
+.strip {
+  display: flex;
+  flex: none;
+  padding: 0.35em 0;
+  overflow: hidden;
+  background: var(--emoji-bones-strip, #ff5fa8);
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 0.45),
+    0 8px 20px rgb(214 51 132 / 0.35);
+}
+
+.track {
+  --_duration: calc(var(--emoji-bones-duration, 10s) * var(--_speed, 1));
+
+  display: flex;
+  flex: none;
+  width: max-content;
+  animation: marquee var(--_duration) linear infinite;
+}
+
+/* Alternate direction: odd strips scroll left, even strips scroll right. */
+.strip:nth-child(even) .track {
+  animation-direction: reverse;
+}
+
+/* Different start offsets, so neighbouring strips are never in step. */
+.strip:nth-child(3n + 2) .track {
+  animation-delay: calc(var(--_duration) * -0.33);
+}
+
+.strip:nth-child(3n) .track {
+  animation-delay: calc(var(--_duration) * -0.66);
+}
+
+.sequence {
+  display: flex;
+  flex: none;
+  gap: 0.6em;
+  /* Same as the gap, so the seam between the two copies is invisible. */
+  padding-right: 0.6em;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  line-height: 1;
+}
+
+.emoji {
+  flex: none;
+  filter: drop-shadow(0 1px 1px rgb(120 20 70 / 0.25));
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bones,
+  .track {
+    animation: none;
+  }
+}
+
+/* ---- Content (the real card the bones stand in for) ---- */
+
+.card {
+  composes: frame;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff2f8 0%, #ffd6e9 100%);
+  box-shadow: inset 0 0 0 1px rgb(214 51 132 / 0.18);
+  color: #5c1237;
+}
+
+.header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ff5fa8;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.text {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--_clamp);
+  line-clamp: var(--_clamp);
+}
+
+.sm .badge {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+}
+
+.sm .title {
+  font-size: 14px;
+}
+
+.sm .text {
+  font-size: 13px;
+  line-height: 18px;
+}

@@ -1,36 +1,76 @@
 {
   "name": "skully",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Headless, child-first skeleton loading for React 19.",
+  "license": "MIT",
   "type": "module",
-  "main": "dist/main.js",
-  "types": "dist/main.d.ts",
-  "files": ["dist"],
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./bones": {
+      "import": {
+        "types": "./dist/bones.d.ts",
+        "default": "./dist/bones.js"
+      },
+      "require": {
+        "types": "./dist/bones.d.cts",
+        "default": "./dist/bones.cjs"
+      }
+    },
+    "./bones.css": "./dist/bones.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build": "tsup && node scripts/check-directive.mjs",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "peerDependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.30.1",
-    "@types/node": "^24.0.11",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "eslint": "^9.30.1",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.3",
-    "vite-plugin-dts": "^4.5.4",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@eslint/js": "^10.0.1",
+    "@storybook/addon-docs": "^10.6.3",
+    "@storybook/react-vite": "^10.6.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-storybook": "^10.6.3",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "storybook": "^10.6.3",
+    "tsup": "^9.0.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }

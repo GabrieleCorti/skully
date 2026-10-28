@@ -1,0 +1,73 @@
+.card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 320px;
+  padding: 16px;
+  border: 1px solid #e3e3e8;
+  border-radius: 12px;
+  background: #fff;
+  font-family: system-ui, sans-serif;
+  transition: opacity 150ms;
+}
+
+.busy {
+  opacity: 0.55;
+}
+
+.avatar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #6c5ce7;
+  color: #fff;
+  font-weight: 600;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.bio {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.compact {
+  width: 240px;
+}
+
+/*
+ * ---- Bones: built from skully/bones primitives (Circle, Line) ----
+ * Each Line reuses the real text's class (.name, .bio), so it gets the same font-size,
+ * line-height and margins: one Line is exactly one line of that text tall. The classes
+ * below only add widths, so the bones card is as tall as the real one.
+ */
+
+.bones {
+  --sk-radius: 6px;
+}
+
+.boneAvatar {
+  width: 48px;
+  height: 48px;
+}
+
+.boneName {
+  width: 60%;
+}
+
+.boneBio:last-child {
+  width: 70%;
+}
