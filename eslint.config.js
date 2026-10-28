@@ -1,23 +1,49 @@
 import js from '@eslint/js'
-import globals from 'globals'
+import prettier from 'eslint-config-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
+import storybook from 'eslint-plugin-storybook'
+import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
 
-export default tseslint.config([
-  globalIgnores(['dist']),
+export default tseslint.config(
+  { ignores: ['dist', 'storybook-static'] },
+  js.configs.recommended,
+  tseslint.configs.strict,
+  reactHooks.configs.flat.recommended,
+  storybook.configs['flat/recommended'],
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
-    ],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: { ...globals.browser, ...globals.node },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportDefaultDeclaration',
+          message: 'Use named exports, not default exports.',
+        },
+        {
+          selector: 'JSXAttribute[name.name="style"]',
+          message: 'Do not use inline styles; use CSS Modules.',
+        },
+      ],
     },
   },
-])
+  {
+    // Tooling and Storybook CSF require default exports; inline styles stay banned.
+    files: ['*.config.{js,ts}', '.storybook/**', '**/*.stories.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXAttribute[name.name="style"]',
+          message: 'Do not use inline styles; use CSS Modules.',
+        },
+      ],
+    },
+  },
+  prettier,
+)

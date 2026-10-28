@@ -1,0 +1,213 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks'
+import * as SkeletonStories from './createSkeleton.Skeleton.stories'
+import * as SuspenseStories from './createSkeleton.SuspenseSkeleton.stories'
+
+<Meta title="Skully/Introduction" />
+
+# skully
+
+Headless, child-first skeleton loading for React 19.
+
+A skully component makes exactly one decision: render the skeleton UI (the _bones_) or render its children. It owns no data and ships no styles (only the optional `skully/bones` primitives come with a stylesheet). It adds no layout DOM either; its only element is a visually hidden status label.
+
+> The skeleton is for "nothing to show yet". Once content has appeared, the component owns its own loading states.
+
+A skeleton that comes back on every refresh throws away content the user was reading and makes the page jump. So by default, skully shows the skeleton until content has been shown once, then steps aside and lets the content decide how to show refreshes (dimming, a spinner, a progress bar…).
+
+## Quick start
+
+Write your bones once, as a plain component with whatever props you need (`lines`, `compact`, `ref`…). Mark it `aria-hidden="true"` so screen readers only hear skully's label.
+
+```tsx
+export function UserCardBones({ lines = 2, compact = false, ref }: UserCardBonesProps) {
+  return (
+    <div ref={ref} className={styles.bones} aria-hidden="true">
+      …
+    </div>
+  )
+}
+```
+
+Then create its two behaviors in a `"use client"` module, exported as separate named constants:
+
+```tsx
+// user-card-skeleton.ts
+'use client'
+import { createSkeleton } from 'skully'
+import { UserCardBones } from './UserCardBones'
+
+export const { Skeleton: UserCardSkeleton, SuspenseSkeleton: UserCardSuspense } =
+  createSkeleton(UserCardBones)
+```
+
+And use them around the real content:
+
+```tsx
+<UserCardSkeleton isLoading={isPending} lines={3}>
+  <UserCard />
+</UserCardSkeleton>
+
+<UserCardSuspense lines={3}>
+  <UserCard />
+</UserCardSuspense>
+```
+
+Every prop of `UserCardBones` (including `ref`) is accepted by both components, fully typed, and forwarded to the bones.
+
+<Canvas of={SkeletonStories.Loading} />
+
+## Children read their own data
+
+The parent creates JSX children before `Skeleton` decides anything. This crashes while loading, because `user.name` is evaluated even though the skeleton is shown:
+
+```tsx
+<UserCardSkeleton isLoading={!user}>
+  <Profile name={user.name} /> {/* crashes: user is undefined while loading */}
+</UserCardSkeleton>
+```
+
+Put data access inside the child instead, using a hook, a query or `use()`:
+
+```tsx
+function Profile() {
+  const { data: user } = useUser()
+  return <h2>{user.name}</h2>
+}
+
+;<UserCardSkeleton isLoading={isPending}>
+  <Profile />
+</UserCardSkeleton>
+```
+
+This is also what lets the child own its refetch state: it has the query, so it knows when it is refreshing.
+
+## `Skeleton`: initial mode vs `always`
+
+`Skeleton` is driven by a flag: `isLoading` (required). The `always` prop picks how that flag is interpreted.
+
+**Initial mode (default).** The skeleton is shown only until content has been shown once in this component instance's lifetime. After that, `isLoading` is ignored and children always render; they handle refetches themselves. Switching items (user 1 → user 2) keeps the old content visible until the new one is ready.
+
+**`always`.** The skeleton is shown whenever `isLoading` is true. Use it with a precise signal that means "no data for this item yet", such as TanStack Query's `isPending` or SWR's `isLoading`. Don't use a flag that is also true on background refetches (`isFetching`, `isValidating`), or every refetch will flash the skeleton. If focus is inside the content when it's swapped for the skeleton, focus is lost.
+
+<table>
+  <thead>
+    <tr>
+      <th>Situation</th>
+      <th>Default mode</th>
+      <th>
+        <code>always</code>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Mount with <code>isLoading=true</code>
+      </td>
+      <td>skeleton</td>
+      <td>skeleton</td>
+    </tr>
+    <tr>
+      <td>
+        Mount with <code>isLoading=false</code>
+      </td>
+      <td>children</td>
+      <td>children</td>
+    </tr>
+    <tr>
+      <td>
+        <code>isLoading</code> true → false
+      </td>
+      <td>children</td>
+      <td>children</td>
+    </tr>
+    <tr>
+      <td>
+        After content shown, <code>isLoading</code> → true (refetch)
+      </td>
+      <td>
+        <strong>children</strong> (kept)
+      </td>
+      <td>skeleton</td>
+    </tr>
+    <tr>
+      <td>Instance remounted</td>
+      <td>starts over</td>
+      <td>starts over</td>
+    </tr>
+  </tbody>
+</table>
+
+Both modes share one `isLoading` flag below. Toggle it a few times, then remount:
+
+<Canvas of={SkeletonStories.InitialVsAlways} />
+
+With a real query, `always` + `isPending` brings the skeleton back when you switch to an item with no data yet, while a refetch of the current item keeps that item on screen.
+
+<Canvas of={SkeletonStories.AlwaysModeWithQuery} />
+
+## `SuspenseSkeleton` and transitions
+
+`SuspenseSkeleton` is a `<Suspense>` boundary whose fallback is your bones plus the hidden label. It has no `isLoading` or `always`. React decides whether a re-suspension shows the fallback again, and its rules are the Suspense equivalent of the two modes:
+
+- Updates inside a transition (`startTransition`, `useDeferredValue`) keep the existing content, like initial mode.
+- Non-transition updates show the fallback again, like `always`.
+
+```tsx
+function UserCard({ id }: { id: number }) {
+  const user = use(fetchUser(id))
+  return <Card user={user} />
+}
+
+;<UserCardSuspense>
+  <UserCard id={id} />
+</UserCardSuspense>
+```
+
+<Canvas of={SuspenseStories.TransitionVsPlainUpdate} />
+
+## Reserved props
+
+`isLoading`, `always`, `label` and `children` belong to skully. They are never forwarded to the bones, even from untyped code, because the library's meaning wins. Every other prop goes straight through.
+
+Because they would silently never arrive, bones that declare `isLoading`, `always` or `label` are a compile-time error in `createSkeleton` (`children` is allowed). Fix a clash with `renameProps(CardBones, { label: 'badge' })`, by renaming the prop in your bones, or with your own wrapper; none is preferred. See [Skully / Renaming props](?path=/docs/skully-renaming-props--docs) for examples.
+
+## Server components
+
+`Skeleton` uses state, so skully ships as a client module (`"use client"`). Create your skeletons in a `"use client"` file and export them as separate named constants, as in the quick start. Server components can then render them and pass server-rendered children:
+
+```tsx
+// page.tsx (server component)
+import { UserCardSuspense } from './user-card-skeleton'
+
+export default function Page() {
+  return (
+    <UserCardSuspense>
+      <UserCard />
+    </UserCardSuspense>
+  )
+}
+```
+
+Don't re-export them as properties of an object (e.g. `Skeletons.User`): dotting into a client module from a server component throws.
+
+## Accessibility
+
+While the skeleton is shown, skully renders a visually hidden `<span role="status">` next to the bones:
+
+- default text: `"Loading…"`;
+- `label="Loading profile"` or `label={<Trans id="loading" />}` to customize or translate it;
+- `label={false}` or `label={null}` renders no status element, for decorative skeletons or areas already announced as loading.
+
+`label` is typed as `SkeletonLabel` (exported from `skully`): any `ReactNode` except `true`.
+
+Mark your bones `aria-hidden="true"` so screen readers only hear the label. In these stories, the dashed box shows what the status element currently announces:
+
+<Canvas of={SkeletonStories.CustomLabel} />
+
+One known limitation: some screen readers don't announce a status element right away when it is inserted together with its content. It can still be found while navigating.
+
+## More examples
+
+- Skully / Skeleton: every state of the flag-driven component, with controls.
+- Skully / SuspenseSkeleton: initial suspension, plain updates, transitions and `useDeferredValue`.

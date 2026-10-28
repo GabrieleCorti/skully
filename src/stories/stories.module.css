@@ -1,0 +1,81 @@
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  font-family: system-ui, sans-serif;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 340px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+}
+
+.hint {
+  margin: 0;
+  min-height: 40px;
+  color: #666;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.toolbar button {
+  padding: 6px 10px;
+  border: 1px solid #c9c9d3;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.status {
+  color: #6c5ce7;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f1f5;
+  color: #555;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+
+.badge[data-active='true'] {
+  background: #ece9fd;
+  color: #6c5ce7;
+}
+
+.inspector {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed #c9c9d3;
+  border-radius: 8px;
+  color: #444;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.inspectorKey {
+  font-family: ui-monospace, monospace;
+  color: #6c5ce7;
+}
+
+.stale {
+  opacity: 0.55;
+  transition: opacity 150ms;
+}

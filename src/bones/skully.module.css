@@ -1,0 +1,91 @@
+/*
+ * Default skully bones. Theme with custom properties on :root or any ancestor:
+ *   --sk-color           base colour         (default: 12% of currentColor)
+ *   --sk-highlight       shimmer highlight   (default: 5% of currentColor)
+ *   --sk-radius          corner radius       (default 4px; Circle is always round)
+ *   --sk-duration        one shimmer cycle   (default 1.4s)
+ *   --sk-delay           anti-flash fade-in  (default 150ms)
+ *   --sk-line-thickness  Line's bar          (default 1em, capped at the line box)
+ *
+ * The colours derive from currentColor, so bones follow the text colour in light
+ * and dark themes. Everything lives in a cascade layer, so any user class wins
+ * regardless of specificity or import order.
+ */
+@layer skully {
+  .bone {
+    display: block;
+  }
+
+  /* Painted surfaces. A Line paints its bar, not its line box. */
+  .circle,
+  .rect,
+  .line::before {
+    background: linear-gradient(
+      90deg,
+      var(--sk-color, color-mix(in srgb, currentColor 12%, transparent)) 25%,
+      var(--sk-highlight, color-mix(in srgb, currentColor 5%, transparent)) 50%,
+      var(--sk-color, color-mix(in srgb, currentColor 12%, transparent)) 75%
+    );
+    background-size: 200% 100%;
+    /* Bones reserve layout immediately but only fade in if loading takes a while. */
+    animation:
+      shimmer var(--sk-duration, 1.4s) linear infinite,
+      fade-in 200ms ease-out var(--sk-delay, 150ms) both;
+  }
+
+  /* One line box of the surrounding typography, with a centred bar inside. */
+  .line {
+    position: relative;
+    width: 100%;
+    height: 1.2em;
+    height: 1lh;
+  }
+
+  .line::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: min(var(--sk-line-thickness, 1em), 100%);
+    margin-block: auto;
+    border-radius: var(--sk-radius, 4px);
+  }
+
+  .circle {
+    flex: none;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+  }
+
+  .rect {
+    width: 100%;
+    height: 6em;
+    border-radius: var(--sk-radius, 4px);
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .circle,
+    .rect,
+    .line::before {
+      animation: none;
+    }
+  }
+}
