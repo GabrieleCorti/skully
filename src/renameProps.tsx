@@ -27,8 +27,8 @@ type CheckRenameTargets<P, M> = {
  * a bones component declares a prop that skully reserves:
  *
  * ```tsx
- * createSkeleton(renameProps(CardBones, { label: 'badge' }))
- * // <CardSkeleton badge="NEW" /> → CardBones receives label="NEW"
+ * createSkeleton(renameProps(ButtonBones, { isLoading: 'busy' }))
+ * // <ButtonSkeleton isLoading={isPending} busy /> → ButtonBones receives isLoading={true}
  * ```
  */
 export function renameProps<P extends object, const M extends RenameMap<P>>(

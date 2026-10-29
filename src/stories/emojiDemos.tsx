@@ -28,10 +28,10 @@ export interface EmojiBonesDemoProps {
   emoji?: string[]
   size?: EmojiBonesSize
   speed?: EmojiBonesSpeed
-  label?: SkeletonLabel
+  loadingLabel?: SkeletonLabel
 }
 
-function TimedPinkCard({ emoji, size, speed, label }: EmojiBonesDemoProps) {
+function TimedPinkCard({ emoji, size, speed, loadingLabel }: EmojiBonesDemoProps) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -40,7 +40,13 @@ function TimedPinkCard({ emoji, size, speed, label }: EmojiBonesDemoProps) {
   }, [])
 
   return (
-    <EmojiSkeleton isLoading={isLoading} label={label} emoji={emoji} size={size} speed={speed}>
+    <EmojiSkeleton
+      isLoading={isLoading}
+      loadingLabel={loadingLabel}
+      emoji={emoji}
+      size={size}
+      speed={speed}
+    >
       <PinkCard {...SKULLY_CARD} size={size} />
     </EmojiSkeleton>
   )
@@ -82,7 +88,7 @@ function SuspendingPinkCard({ nonce, size }: SuspendingPinkCardProps) {
 /** Offset so these requests never share a cached promise with the other stories. */
 const NONCE_OFFSET = 10_000
 
-export function EmojiSuspenseDemo({ emoji, size, speed, label }: EmojiBonesDemoProps) {
+export function EmojiSuspenseDemo({ emoji, size, speed, loadingLabel }: EmojiBonesDemoProps) {
   const [nonce, setNonce] = useState(NONCE_OFFSET)
   return (
     <section className={styles.column}>
@@ -92,7 +98,7 @@ export function EmojiSuspenseDemo({ emoji, size, speed, label }: EmojiBonesDemoP
         </button>
       </div>
       <StatusInspector>
-        <EmojiSuspense label={label} emoji={emoji} size={size} speed={speed}>
+        <EmojiSuspense loadingLabel={loadingLabel} emoji={emoji} size={size} speed={speed}>
           <SuspendingPinkCard nonce={nonce} size={size} />
         </EmojiSuspense>
       </StatusInspector>

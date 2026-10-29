@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 
 /** Prop names owned by skully. They are never forwarded to the bones component. */
-export type ReservedProps = 'isLoading' | 'always' | 'label' | 'children'
+export type ReservedProps = 'isLoading' | 'always' | 'loadingLabel' | 'children'
 
 /**
  * Visually hidden status text shown with the skeleton. `false` or `null` renders
@@ -38,13 +38,13 @@ export type SkeletonProps<P> = ForwardedProps<P> & {
    */
   always?: boolean
   /** Visually hidden status text. `false` or `null` renders no status element. Defaults to `"Loading…"`. */
-  label?: SkeletonLabel
+  loadingLabel?: SkeletonLabel
   children?: ReactNode
 }
 
 export type SuspenseSkeletonProps<P> = ForwardedProps<P> & {
   /** Visually hidden status text. `false` or `null` renders no status element. Defaults to `"Loading…"`. */
-  label?: SkeletonLabel
+  loadingLabel?: SkeletonLabel
   children?: ReactNode
 }
 

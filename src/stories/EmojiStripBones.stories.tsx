@@ -47,7 +47,7 @@ export const { Skeleton: EmojiSkeleton, SuspenseSkeleton: EmojiSuspense } =
 
 - \`emoji\`, \`size\`, \`speed\` and \`ref\` are typed from \`EmojiStripBonesProps\` and forwarded
   untouched; a typo or a wrong value is a type error. The reserved props \`isLoading\`, \`always\`,
-  \`label\` and \`children\` are skully's and never reach the bones.
+  \`loadingLabel\` and \`children\` are skully's and never reach the bones.
 - The bones are decorative (\`aria-hidden\`); skully adds the visually hidden
   \`role="status"\` label next to them.
 - Bones and content share the same size classes, so nothing shifts when the content appears.
@@ -64,7 +64,7 @@ export const { Skeleton: EmojiSkeleton, SuspenseSkeleton: EmojiSuspense } =
   args: {
     isLoading: true,
     always: false,
-    label: 'Loading…',
+    loadingLabel: 'Loading…',
     emoji: DEFAULT_EMOJI,
     size: 'md',
     speed: 'slow',
@@ -87,7 +87,7 @@ export const { Skeleton: EmojiSkeleton, SuspenseSkeleton: EmojiSuspense } =
         defaultValue: { summary: 'false' },
       },
     },
-    label: {
+    loadingLabel: {
       description:
         'Visually hidden text of the `role="status"` element rendered next to the bones. `false` or `null` renders no status element.',
       control: 'text',
@@ -157,7 +157,7 @@ export const Playground: Story = {
     docs: {
       description: {
         story: `
-Every prop is wired to the controls: skully's (\`isLoading\`, \`always\`, \`label\`) and the bones'
+Every prop is wired to the controls: skully's (\`isLoading\`, \`always\`, \`loadingLabel\`) and the bones'
 (\`emoji\`, \`size\`, \`speed\`).
 
 **Try:** edit the \`emoji\` array, switch \`size\` and \`speed\`. The strips update live because
@@ -172,7 +172,7 @@ exactly the same space.
 export const LoadingToContent: Story = {
   name: 'Loading → content',
   parameters: {
-    controls: { include: ['label', 'emoji', 'size', 'speed'] },
+    controls: { include: ['loadingLabel', 'emoji', 'size', 'speed'] },
     docs: {
       description: {
         story: `
@@ -185,15 +185,15 @@ same size, so the layout doesn't shift.
       },
     },
   },
-  render: ({ label, emoji, size, speed }) => (
-    <EmojiLoadDemo label={label} emoji={emoji} size={size} speed={speed} />
+  render: ({ loadingLabel, emoji, size, speed }) => (
+    <EmojiLoadDemo loadingLabel={loadingLabel} emoji={emoji} size={size} speed={speed} />
   ),
 }
 
 export const WithSuspense: Story = {
   name: 'SuspenseSkeleton',
   parameters: {
-    controls: { include: ['label', 'emoji', 'size', 'speed'] },
+    controls: { include: ['loadingLabel', 'emoji', 'size', 'speed'] },
     docs: {
       description: {
         story: `
@@ -207,8 +207,8 @@ emoji fallback again.
       },
     },
   },
-  render: ({ label, emoji, size, speed }) => (
-    <EmojiSuspenseDemo label={label} emoji={emoji} size={size} speed={speed} />
+  render: ({ loadingLabel, emoji, size, speed }) => (
+    <EmojiSuspenseDemo loadingLabel={loadingLabel} emoji={emoji} size={size} speed={speed} />
   ),
 }
 

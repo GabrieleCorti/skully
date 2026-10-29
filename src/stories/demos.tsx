@@ -315,13 +315,13 @@ export function DeferredValueDemo() {
 }
 
 export interface ReloadDemoProps {
-  label?: SkeletonLabel
+  loadingLabel?: SkeletonLabel
   lines?: number
   compact?: boolean
 }
 
 /** Suspends on mount; Reload starts a new request with a plain (non-transition) update. */
-export function ReloadDemo({ label, lines, compact }: ReloadDemoProps) {
+export function ReloadDemo({ loadingLabel, lines, compact }: ReloadDemoProps) {
   const [nonce, setNonce] = useState(0)
   return (
     <section className={styles.column}>
@@ -331,7 +331,7 @@ export function ReloadDemo({ label, lines, compact }: ReloadDemoProps) {
         </button>
       </div>
       <StatusInspector>
-        <UserCardSuspense label={label} lines={lines} compact={compact}>
+        <UserCardSuspense loadingLabel={loadingLabel} lines={lines} compact={compact}>
           <SuspendingUserCard userId={1} nonce={nonce} compact={compact} />
         </UserCardSuspense>
       </StatusInspector>

@@ -1,5 +1,6 @@
-import { Suspense, type ComponentType, type CSSProperties } from 'react'
+import { Suspense, type ComponentType } from 'react'
 import { useHasRevealed } from './hooks/useHasRevealed'
+import { LoadingStatus } from './LoadingStatus'
 import { getDisplayName } from './utils/displayName'
 import type {
   CheckBones,
@@ -10,27 +11,12 @@ import type {
   SuspenseSkeletonProps,
 } from './types'
 
-const DEFAULT_LABEL = 'Loading…'
-
 const RESERVED: ReadonlySet<string> = new Set<ReservedProps>([
   'isLoading',
   'always',
-  'label',
+  'loadingLabel',
   'children',
 ])
-
-// Inline on purpose: the status element must be hidden without shipping a CSS file.
-const visuallyHidden: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-}
 
 /**
  * Strips reserved props at runtime too, so they never reach `Bones` even when
@@ -49,16 +35,13 @@ function forwardedProps<P>(props: object): P {
 function renderBones<P extends object>(
   Bones: ComponentType<P>,
   props: object,
-  label: SkeletonLabel,
+  loadingLabel: SkeletonLabel,
 ) {
   return (
     <>
       <Bones {...forwardedProps<P>(props)} />
-      {label !== false && label !== null && (
-        // eslint-disable-next-line no-restricted-syntax -- the spec requires hiding without a CSS file
-        <span role="status" style={visuallyHidden}>
-          {label}
-        </span>
+      {loadingLabel !== false && loadingLabel !== null && (
+        <LoadingStatus>{loadingLabel}</LoadingStatus>
       )}
     </>
   )
@@ -68,7 +51,7 @@ function renderBones<P extends object>(
  * Defines a skeleton UI once and returns its two behaviors. Call it in a
  * `"use client"` module and export the results as separate named constants.
  *
- * Bones must not declare `isLoading`, `always` or `label`: that is a compile error,
+ * Bones must not declare `isLoading`, `always` or `loadingLabel`: that is a compile error,
  * because Bones would never receive them. See `renameProps` for one way to fix it.
  */
 export function createSkeleton<P extends object>(
@@ -77,18 +60,18 @@ export function createSkeleton<P extends object>(
   const bonesName = getDisplayName(Bones)
 
   function Skeleton(props: SkeletonProps<P>) {
-    const { isLoading, always = false, label = DEFAULT_LABEL, children } = props
+    const { isLoading, always = false, loadingLabel, children } = props
     const hasRevealed = useHasRevealed(isLoading)
     const showSkeleton = isLoading && (always || !hasRevealed)
     if (!showSkeleton) return children ?? null
 
-    return renderBones(Bones, props, label)
+    return renderBones(Bones, props, loadingLabel)
   }
   Skeleton.displayName = `Skeleton(${bonesName})`
 
   function SuspenseSkeleton(props: SuspenseSkeletonProps<P>) {
-    const { label = DEFAULT_LABEL, children } = props
-    return <Suspense fallback={renderBones(Bones, props, label)}>{children}</Suspense>
+    const { loadingLabel, children } = props
+    return <Suspense fallback={renderBones(Bones, props, loadingLabel)}>{children}</Suspense>
   }
   SuspenseSkeleton.displayName = `SuspenseSkeleton(${bonesName})`
 

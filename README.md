@@ -31,7 +31,7 @@ export const { Skeleton: UserCardSkeleton } = createSkeleton(UserCardBones)
 
 Every usage also gets:
 
-- No skeleton flash on refetch. By default the skeleton only shows until the content has appeared once. After that the content stays on screen and handles its own refresh state. Pass `always` when you do want the skeleton back, for example when switching to another item.
+- No skeleton flash on refetch. By default the skeleton only shows on the first load, and after that the content handles its own refresh state. Pass `always` to show it every time.
 - Compile-time checks for reserved props. If your bones declare a prop that skully owns, the code doesn't compile, so the prop can't silently go missing.
 - An accessible status label. skully renders a visually hidden `role="status"` element next to the bones. It says "Loading…" by default, and you can translate it.
 - A matching `SuspenseSkeleton`, which uses the same bones as a Suspense fallback.
@@ -42,7 +42,7 @@ skully is headless. The bones are your own component, and skully adds no layout 
 npm install skully
 ```
 
-skully needs `react@^19` and has no runtime dependencies.
+skully needs `react@^19` and has no runtime dependencies. TypeScript users need `typescript@>=5.3`. On older versions the `renameProps` types widen to `string`, and every prop fails with an unreadable error.
 
 ## Quick start
 
@@ -164,7 +164,8 @@ function UserPanel() {
 ```tsx
 function Profile() {
   const { data: user, isFetching } = useUser()
-  if (!user) return null // never visible: the skeleton covers "no data yet"
+  // The skeleton covers the first load.
+  if (!user) return null
   return <h2 className={isFetching ? styles.stale : undefined}>{user.name}</h2>
 }
 
@@ -182,42 +183,26 @@ With `SuspenseSkeleton`, a suspending read such as `use()` or `useSuspenseQuery`
 
 ## `Skeleton`
 
-| Prop        | Type            | Default      |                                                 |
-| ----------- | --------------- | ------------ | ----------------------------------------------- |
-| `isLoading` | `boolean`       | required     | Whether the data is still loading.              |
-| `always`    | `boolean`       | `false`      | Show the skeleton whenever `isLoading` is true. |
-| `label`     | `SkeletonLabel` | `"Loading…"` | Visually hidden status text.                    |
-| `children`  | `ReactNode`     |              | The real content.                               |
+| Prop           | Type            | Default      |                                                 |
+| -------------- | --------------- | ------------ | ----------------------------------------------- |
+| `isLoading`    | `boolean`       | required     | Whether the data is still loading.              |
+| `always`       | `boolean`       | `false`      | Show the skeleton whenever `isLoading` is true. |
+| `loadingLabel` | `SkeletonLabel` | `"Loading…"` | Visually hidden status text.                    |
+| `children`     | `ReactNode`     |              | The real content.                               |
 
-### Initial mode (default)
+### Default vs `always`
 
-The skeleton only shows until this component instance has shown its content once. From then on `isLoading` is ignored and the children always render. They handle refetches themselves, for example by dimming or showing a spinner.
+By default the skeleton only shows on the first load. After that the children stay on screen and have to handle refetches themselves, for example by dimming or showing a spinner.
 
-This also applies when you switch items. Without `always`, going from user 1 to user 2 keeps user 1 on screen until user 2 is ready, so the component should show its own loading state in the meantime.
-
-### `always`
-
-With `always`, the skeleton shows whenever `isLoading` is true.
-
-Pair it with a signal that means "there's no data for this item yet", such as TanStack Query's `isPending` or SWR's `isLoading`. A flag that is also true during background refetches (`isFetching`, `isValidating`) would bring the skeleton back on every refetch.
+Pass `always` to show the skeleton every time `isLoading` is true:
 
 ```tsx
-const { isPending } = useQuery({ queryKey: ['user', id], queryFn })
-
-<UserCardSkeleton isLoading={isPending} always>
+<UserCardSkeleton isLoading={isLoading} always>
   <UserCard id={id} />
 </UserCardSkeleton>
 ```
 
-> If focus is inside the content when the skeleton replaces it, the focus is lost.
-
-| Situation                                         | Default mode        | `always`    |
-| ------------------------------------------------- | ------------------- | ----------- |
-| Mount with `isLoading=true`                       | skeleton            | skeleton    |
-| Mount with `isLoading=false`                      | children            | children    |
-| `isLoading` true → false                          | children            | children    |
-| After content shown, `isLoading` → true (refetch) | **children** (kept) | skeleton    |
-| Instance remounted                                | starts over         | starts over |
+With `always`, pass a flag that means "no data yet", not one that is also true during background refetches, or every refetch brings the skeleton back. For example, with TanStack Query that's `isPending` rather than `isFetching`.
 
 ## `SuspenseSkeleton`
 
@@ -245,36 +230,36 @@ React decides whether a second suspension shows the fallback again, which works 
 
 ## Reserved props
 
-`isLoading`, `always`, `label` and `children` belong to skully, and it never passes them on to the bones.
+`isLoading`, `always`, `loadingLabel` and `children` belong to skully, and it never passes them on to the bones. Every other prop, including `label`, goes straight through.
 
-So if your bones declared `isLoading`, `always` or `label`, they would never receive it, and nothing would tell you. `createSkeleton` turns that into a compile error instead:
+So if your bones declared `isLoading`, `always` or `loadingLabel`, they would never receive it, and nothing would tell you. `createSkeleton` turns that into a compile error instead:
 
 ```tsx
-interface CardBonesProps {
-  title: string
-  label: string // the badge text drawn on the card
+interface ButtonBonesProps {
+  text: string
+  isLoading: boolean // draws a spinner inside the button
 }
 
-createSkeleton(CardBones)
-//             ~~~~~~~~~
+createSkeleton(ButtonBones)
+//             ~~~~~~~~~~~
 // … is not assignable to parameter of type '… & "skully: Bones declares the reserved
-// prop \"label\". Rename it, e.g. renameProps(Bones, { label: 'newName' }), rename it
-// in Bones, or wrap Bones yourself."'
+// prop \"isLoading\". Rename it, e.g. renameProps(Bones, { isLoading: 'newName' }),
+// rename it in Bones, or wrap Bones yourself."'
 ```
 
 `children` is allowed, so you can build bones on top of `PropsWithChildren` components. They just never receive skully's children.
 
 There are three ways to fix a clash, and none of them is the preferred one:
 
-1. Use `renameProps`: `createSkeleton(renameProps(CardBones, { label: 'badge' }))` (see below).
-2. Rename the prop in your bones, for example from `label` to `badge`.
+1. Use `renameProps`: `createSkeleton(renameProps(ButtonBones, { isLoading: 'busy' }))` (see below).
+2. Rename the prop in your bones, for example from `isLoading` to `busy`.
 3. Wrap the bones yourself:
    ```tsx
-   function CardBonesAdapter({
-     badge,
+   function ButtonBonesAdapter({
+     busy,
      ...rest
-   }: Omit<CardBonesProps, 'label'> & { badge: string }) {
-     return <CardBones label={badge} {...rest} />
+   }: Omit<ButtonBonesProps, 'isLoading'> & { busy: boolean }) {
+     return <ButtonBones isLoading={busy} {...rest} />
    }
    ```
 
@@ -293,18 +278,20 @@ function renameProps<P, M extends { [K in keyof P]?: string }>(
 'use client'
 import { createSkeleton, renameProps } from '@gico/skully'
 
-export const { Skeleton: CardSkeleton } = createSkeleton(renameProps(CardBones, { label: 'badge' }))
+export const { Skeleton: ButtonSkeleton } = createSkeleton(
+  renameProps(ButtonBones, { isLoading: 'busy' }),
+)
 
-<CardSkeleton isLoading={isPending} title="Ada" badge="NEW" label="Loading card">
-  <Card />
-</CardSkeleton>
-// CardBones receives title="Ada" label="NEW"; "Loading card" is skully's hidden status text.
+<ButtonSkeleton isLoading={isPending} text="Save" busy>
+  <SaveButton />
+</ButtonSkeleton>
+// skully reads isLoading={isPending}; ButtonBones receives text="Save" isLoading={true}.
 ```
 
 - A renamed prop keeps its type, and stays required or optional. Other props and `ref` pass through unchanged.
-- An unknown old name (`{ lable: 'badge' }`) is a type error, and so is a new name that collides with an existing prop (`{ label: 'title' }`).
-- Renaming into a reserved name (`{ label: 'always' }`) brings back the reserved-prop error.
-- React DevTools shows the wrapper as `Renamed(CardBones)`.
+- An unknown old name (`{ isLoadin: 'busy' }`) is a type error, and so is a new name that collides with an existing prop (`{ isLoading: 'text' }`).
+- Renaming into a reserved name (`{ isLoading: 'always' }`) brings back the reserved-prop error.
+- React DevTools shows the wrapper as `Renamed(ButtonBones)`.
 
 ## Server components
 
@@ -317,10 +304,26 @@ Don't group them as properties of an object (such as `Skeletons.User`). A server
 While the skeleton is shown, skully renders a visually hidden `<span role="status">` next to the bones. It's the only DOM element skully adds itself.
 
 - The default text is `"Loading…"`.
-- Use `label="Loading profile"` or `label={<Trans id="loading" />}` to change or translate it.
-- `label={false}` or `label={null}` renders no status element. Use it for decorative skeletons, or in areas that already announce that they're loading.
+- Use `loadingLabel="Loading profile"` or `loadingLabel={<Trans id="loading" />}` to change or translate it.
+- `loadingLabel={false}` or `loadingLabel={null}` renders no status element. Use it for decorative skeletons, or in areas that already announce that they're loading.
 
 The label's type, `SkeletonLabel`, is any `ReactNode` except `true`, which doesn't mean anything as a label.
+
+When you render bones without a skully wrapper, for example in a Next.js `loading.tsx`, add the same status element yourself with `LoadingStatus`. Its children are the text, and they default to `"Loading…"`:
+
+```tsx
+// app/profile/loading.tsx
+import { LoadingStatus } from '@gico/skully'
+
+export default function Loading() {
+  return (
+    <>
+      <UserCardBones />
+      <LoadingStatus>Loading profile</LoadingStatus>
+    </>
+  )
+}
+```
 
 Hide the bones from screen readers so they only hear the label. The `skully/bones` primitives already set `aria-hidden="true"`, so you only need it on custom bones or on wrapper elements around the primitives.
 

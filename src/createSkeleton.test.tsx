@@ -230,14 +230,14 @@ describe('Skeleton', () => {
       const { Skeleton, spy } = setup()
 
       render(
-        <Skeleton isLoading always label="Fetching" lines={3} variant="compact">
+        <Skeleton isLoading always loadingLabel="Fetching" lines={3} variant="compact">
           <Content />
         </Skeleton>,
       )
 
       expect(screen.getAllByTestId('bone-line')).toHaveLength(3)
       expect(bones()?.dataset.variant).toBe('compact')
-      // Exact equality: no `isLoading`, `always`, `label` or `children` reach Bones.
+      // Exact equality: no `isLoading`, `always`, `loadingLabel` or `children` reach Bones.
       expect(spy).toHaveBeenCalled()
       for (const [props] of spy.mock.calls) {
         expect(props).toEqual({ lines: 3, variant: 'compact' })
@@ -246,7 +246,13 @@ describe('Skeleton', () => {
 
     it('never forwards reserved props even when Bones declares them', () => {
       const received = vi.fn<(props: object) => void>()
-      function ClashingBones(props: { width: number; label: string; children: string }) {
+      function ClashingBones(props: {
+        width: number
+        isLoading: string
+        always: number
+        loadingLabel: string
+        children: string
+      }) {
         received(props)
         return <div data-testid="bones" />
       }
@@ -257,7 +263,7 @@ describe('Skeleton', () => {
       )
 
       render(
-        <Skeleton isLoading label="Library label" width={10}>
+        <Skeleton isLoading always loadingLabel="Library label" width={10}>
           <Content />
         </Skeleton>,
       )
@@ -267,6 +273,21 @@ describe('Skeleton', () => {
       for (const [props] of received.mock.calls) {
         expect(props).toEqual({ width: 10 })
       }
+    })
+
+    it('forwards a `label` prop declared by bones, separately from `loadingLabel`', () => {
+      const received = vi.fn<(props: object) => void>()
+      function ButtonBones(props: { label: string }) {
+        received(props)
+        return <div data-testid="bones">{props.label}</div>
+      }
+      const { Skeleton } = createSkeleton(ButtonBones)
+
+      render(<Skeleton isLoading label="Save" loadingLabel="Saving" />)
+
+      expect(bones()?.textContent).toBe('Save')
+      expect(screen.getByRole('status').textContent).toBe('Saving')
+      expect(received).toHaveBeenLastCalledWith({ label: 'Save' })
     })
 
     it('forwards `ref` to bones and releases it when children replace them', () => {
@@ -375,7 +396,7 @@ describe('Skeleton', () => {
   })
 })
 
-describe('label', () => {
+describe('loadingLabel', () => {
   it('renders a default visually hidden status only while the skeleton is shown', () => {
     const { Skeleton } = setup()
     const { rerender } = render(
@@ -410,36 +431,36 @@ describe('label', () => {
 
   it('renders a custom string', () => {
     const { Skeleton } = setup()
-    render(<Skeleton isLoading lines={1} label="Loading profile" />)
+    render(<Skeleton isLoading lines={1} loadingLabel="Loading profile" />)
     expect(screen.getByRole('status').textContent).toBe('Loading profile')
   })
 
   it('renders a custom node', () => {
     const { Skeleton } = setup()
-    render(<Skeleton isLoading lines={1} label={<em>Caricamento…</em>} />)
-    const label = within(screen.getByRole('status')).getByText('Caricamento…')
-    expect(label.tagName).toBe('EM')
+    render(<Skeleton isLoading lines={1} loadingLabel={<em>Caricamento…</em>} />)
+    const node = within(screen.getByRole('status')).getByText('Caricamento…')
+    expect(node.tagName).toBe('EM')
   })
 
-  it('renders no status element with `label={false}`', () => {
+  it('renders no status element with `loadingLabel={false}`', () => {
     const { Skeleton } = setup()
-    const { container } = render(<Skeleton isLoading lines={1} label={false} />)
+    const { container } = render(<Skeleton isLoading lines={1} loadingLabel={false} />)
     expect(bones()).not.toBeNull()
     expect(status()).toBeNull()
     expect(container.childElementCount).toBe(1)
   })
 
-  it('renders no status element with `label={null}`', () => {
+  it('renders no status element with `loadingLabel={null}`', () => {
     const { Skeleton } = setup()
-    const { container } = render(<Skeleton isLoading lines={1} label={null} />)
+    const { container } = render(<Skeleton isLoading lines={1} loadingLabel={null} />)
     expect(bones()).not.toBeNull()
     expect(status()).toBeNull()
     expect(container.childElementCount).toBe(1)
   })
 
-  it('renders the default status with `label={undefined}`', () => {
+  it('renders the default status with `loadingLabel={undefined}`', () => {
     const { Skeleton } = setup()
-    render(<Skeleton isLoading lines={1} label={undefined} />)
+    render(<Skeleton isLoading lines={1} loadingLabel={undefined} />)
     expect(screen.getByRole('status').textContent).toBe('Loading…')
   })
 
@@ -466,7 +487,7 @@ describe('label', () => {
   it('follows the skeleton when `always` shows it again', () => {
     const { Skeleton } = setup()
     const ui = (isLoading: boolean) => (
-      <Skeleton isLoading={isLoading} always lines={1} label="Refreshing">
+      <Skeleton isLoading={isLoading} always lines={1} loadingLabel="Refreshing">
         <Content />
       </Skeleton>
     )
@@ -485,7 +506,7 @@ describe('label', () => {
 })
 
 describe('SuspenseSkeleton', () => {
-  it('shows bones and label while a child suspends, then the children', async () => {
+  it('shows bones and the loading status while a child suspends, then the children', async () => {
     const { SuspenseSkeleton } = setup()
     const { promise, resolve } = deferred<string>()
 
@@ -523,7 +544,7 @@ describe('SuspenseSkeleton', () => {
 
     const { container } = await act(async () =>
       render(
-        <SuspenseSkeleton lines={1} label="Loading profile">
+        <SuspenseSkeleton lines={1} loadingLabel="Loading profile">
           <Reader promise={deferred<string>().promise} />
         </SuspenseSkeleton>,
       ),
@@ -535,13 +556,13 @@ describe('SuspenseSkeleton', () => {
   })
 
   it.each([false, null] as const)(
-    'renders no fallback status element with `label={%s}`',
-    async (label) => {
+    'renders no fallback status element with `loadingLabel={%s}`',
+    async (loadingLabel) => {
       const { SuspenseSkeleton } = setup()
 
       const { container } = await act(async () =>
         render(
-          <SuspenseSkeleton lines={1} label={label}>
+          <SuspenseSkeleton lines={1} loadingLabel={loadingLabel}>
             <Reader promise={deferred<string>().promise} />
           </SuspenseSkeleton>,
         ),
@@ -553,12 +574,12 @@ describe('SuspenseSkeleton', () => {
     },
   )
 
-  it('renders the default fallback status with `label={undefined}`', async () => {
+  it('renders the default fallback status with `loadingLabel={undefined}`', async () => {
     const { SuspenseSkeleton } = setup()
 
     await act(async () =>
       render(
-        <SuspenseSkeleton lines={1} label={undefined}>
+        <SuspenseSkeleton lines={1} loadingLabel={undefined}>
           <Reader promise={deferred<string>().promise} />
         </SuspenseSkeleton>,
       ),
@@ -575,7 +596,7 @@ describe('SuspenseSkeleton', () => {
 
     await act(async () => {
       render(
-        <Untyped isLoading always label={false} lines={4} variant="compact">
+        <Untyped isLoading always loadingLabel={false} lines={4} variant="compact">
           <Reader promise={deferred<string>().promise} />
         </Untyped>,
       )

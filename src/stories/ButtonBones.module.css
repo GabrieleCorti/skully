@@ -1,0 +1,71 @@
+/* Bones and content share .frame, so nothing shifts on reveal. */
+
+.frame {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* ---- Bones ---- */
+
+.bones {
+  background: #ecebf3;
+}
+
+.bar {
+  width: 70%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #dcdae8 0%, #f0eff6 50%, #dcdae8 100%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* Drawn when the bones' own `isLoading` is true. */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #c9c6dc;
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .spinner {
+    animation: none;
+  }
+}
+
+/* ---- Content ---- */
+
+.button {
+  background: #6c5ce7;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

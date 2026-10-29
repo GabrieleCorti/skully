@@ -81,68 +81,25 @@ function Profile() {
 
 This is also what lets the child own its refetch state: it has the query, so it knows when it is refreshing.
 
-## `Skeleton`: initial mode vs `always`
+## `Skeleton`: default vs `always`
 
-`Skeleton` is driven by a flag: `isLoading` (required). The `always` prop picks how that flag is interpreted.
+By default the skeleton only shows on the first load. After that the children stay on screen and have to handle refetches themselves, for example by dimming or showing a spinner.
 
-**Initial mode (default).** The skeleton is shown only until content has been shown once in this component instance's lifetime. After that, `isLoading` is ignored and children always render; they handle refetches themselves. Switching items (user 1 → user 2) keeps the old content visible until the new one is ready.
+Pass `always` to show the skeleton every time `isLoading` is true:
 
-**`always`.** The skeleton is shown whenever `isLoading` is true. Use it with a precise signal that means "no data for this item yet", such as TanStack Query's `isPending` or SWR's `isLoading`. Don't use a flag that is also true on background refetches (`isFetching`, `isValidating`), or every refetch will flash the skeleton. If focus is inside the content when it's swapped for the skeleton, focus is lost.
+```tsx
+<UserCardSkeleton isLoading={isLoading} always>
+  <UserCard id={id} />
+</UserCardSkeleton>
+```
 
-<table>
-  <thead>
-    <tr>
-      <th>Situation</th>
-      <th>Default mode</th>
-      <th>
-        <code>always</code>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        Mount with <code>isLoading=true</code>
-      </td>
-      <td>skeleton</td>
-      <td>skeleton</td>
-    </tr>
-    <tr>
-      <td>
-        Mount with <code>isLoading=false</code>
-      </td>
-      <td>children</td>
-      <td>children</td>
-    </tr>
-    <tr>
-      <td>
-        <code>isLoading</code> true → false
-      </td>
-      <td>children</td>
-      <td>children</td>
-    </tr>
-    <tr>
-      <td>
-        After content shown, <code>isLoading</code> → true (refetch)
-      </td>
-      <td>
-        <strong>children</strong> (kept)
-      </td>
-      <td>skeleton</td>
-    </tr>
-    <tr>
-      <td>Instance remounted</td>
-      <td>starts over</td>
-      <td>starts over</td>
-    </tr>
-  </tbody>
-</table>
+With `always`, pass a flag that means "no data yet", not one that is also true during background refetches, or every refetch brings the skeleton back. For example, with TanStack Query that's `isPending` rather than `isFetching`.
 
 Both modes share one `isLoading` flag below. Toggle it a few times, then remount:
 
 <Canvas of={SkeletonStories.InitialVsAlways} />
 
-With a real query, `always` + `isPending` brings the skeleton back when you switch to an item with no data yet, while a refetch of the current item keeps that item on screen.
+Here `always` gets a "no data yet" flag: switching to an item that has no data brings the skeleton back, while refetching the current item keeps it on screen.
 
 <Canvas of={SkeletonStories.AlwaysModeWithQuery} />
 
@@ -168,9 +125,9 @@ function UserCard({ id }: { id: number }) {
 
 ## Reserved props
 
-`isLoading`, `always`, `label` and `children` belong to skully. They are never forwarded to the bones, even from untyped code, because the library's meaning wins. Every other prop goes straight through.
+`isLoading`, `always`, `loadingLabel` and `children` belong to skully. They are never forwarded to the bones, even from untyped code, because the library's meaning wins. Every other prop goes straight through.
 
-Because they would silently never arrive, bones that declare `isLoading`, `always` or `label` are a compile-time error in `createSkeleton` (`children` is allowed). Fix a clash with `renameProps(CardBones, { label: 'badge' })`, by renaming the prop in your bones, or with your own wrapper; none is preferred. See [Skully / Renaming props](?path=/docs/skully-renaming-props--docs) for examples.
+Because they would silently never arrive, bones that declare `isLoading`, `always` or `loadingLabel` are a compile-time error in `createSkeleton` (`children` is allowed). Fix a clash with `renameProps(ButtonBones, { isLoading: 'busy' })`, by renaming the prop in your bones, or with your own wrapper; none is preferred. See [Skully / Renaming props](?path=/docs/skully-renaming-props--docs) for examples.
 
 ## Server components
 
@@ -196,14 +153,32 @@ Don't re-export them as properties of an object (e.g. `Skeletons.User`): dotting
 While the skeleton is shown, skully renders a visually hidden `<span role="status">` next to the bones:
 
 - default text: `"Loading…"`;
-- `label="Loading profile"` or `label={<Trans id="loading" />}` to customize or translate it;
-- `label={false}` or `label={null}` renders no status element, for decorative skeletons or areas already announced as loading.
+- `loadingLabel="Loading profile"` or `loadingLabel={<Trans id="loading" />}` to customize or translate it;
+- `loadingLabel={false}` or `loadingLabel={null}` renders no status element, for decorative skeletons or areas already announced as loading.
 
-`label` is typed as `SkeletonLabel` (exported from `skully`): any `ReactNode` except `true`.
+`loadingLabel` is typed as `SkeletonLabel` (exported from `skully`): any `ReactNode` except `true`.
 
 Mark your bones `aria-hidden="true"` so screen readers only hear the label. In these stories, the dashed box shows what the status element currently announces:
 
 <Canvas of={SkeletonStories.CustomLabel} />
+
+Bones rendered outside the skully components (e.g. in a Next.js `loading.tsx`) get no status element. Add one with `LoadingStatus`, the same visually hidden `<span role="status">` (children default to `"Loading…"`):
+
+```tsx
+// app/profile/loading.tsx
+import { LoadingStatus } from '@gico/skully'
+
+export default function Loading() {
+  return (
+    <>
+      <UserCardBones />
+      <LoadingStatus>Loading profile</LoadingStatus>
+    </>
+  )
+}
+```
+
+See [Skully / LoadingStatus](?path=/docs/skully-loadingstatus--docs).
 
 One known limitation: some screen readers don't announce a status element right away when it is inserted together with its content. It can still be found while navigating.
 
@@ -211,3 +186,6 @@ One known limitation: some screen readers don't announce a status element right 
 
 - Skully / Skeleton: every state of the flag-driven component, with controls.
 - Skully / SuspenseSkeleton: initial suspension, plain updates, transitions and `useDeferredValue`.
+- Skully / Forwarding props: bones with their own `label`, forwarded next to skully's `loadingLabel`.
+- Skully / Renaming props: fixing a reserved-prop clash with `renameProps(ButtonBones, { isLoading: 'busy' })`.
+- Skully / LoadingStatus: the status element on its own, for bones rendered outside skully.
