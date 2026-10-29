@@ -24,7 +24,7 @@ function CardBones(_: CardBonesProps) {
 // Bones that also declare props whose names are reserved by the library.
 interface ClashingBonesProps {
   width: number
-  label: string
+  loadingLabel: string
   isLoading: string
   always: number
   children: () => void
@@ -102,15 +102,15 @@ describe('reserved props', () => {
     type Props = SkeletonProps<ClashingBonesProps>
     expectTypeOf<Props['isLoading']>().toEqualTypeOf<boolean>()
     expectTypeOf<Props['always']>().toEqualTypeOf<boolean | undefined>()
-    expectTypeOf<Props['label']>().toEqualTypeOf<SkeletonLabel | undefined>()
+    expectTypeOf<Props['loadingLabel']>().toEqualTypeOf<SkeletonLabel | undefined>()
     expectTypeOf<Props['children']>().toEqualTypeOf<ReactNode | undefined>()
 
     void (
-      <Clashing.Skeleton isLoading width={1} label={false} always>
+      <Clashing.Skeleton isLoading width={1} loadingLabel={false} always>
         <p>content</p>
       </Clashing.Skeleton>
     )
-    void (<Clashing.Skeleton isLoading width={1} label="Loading profile" />)
+    void (<Clashing.Skeleton isLoading width={1} loadingLabel="Loading profile" />)
     // @ts-expect-error the library's `isLoading` wins over Bones' string type
     void (<Clashing.Skeleton isLoading="yes" width={1} />)
     // @ts-expect-error the library's `always` wins over Bones' number type
@@ -119,29 +119,29 @@ describe('reserved props', () => {
     void (<Clashing.Skeleton isLoading width={1} children={() => {}} />)
   })
 
-  it('accept `label` as a string, a node, false or null', () => {
+  it('accept `loadingLabel` as a string, a node, false or null', () => {
     expectTypeOf<SkeletonLabel>().toEqualTypeOf<Exclude<ReactNode, true>>()
 
-    void (<Skeleton isLoading name="Ada" label="Loading profile" />)
-    void (<Skeleton isLoading name="Ada" label={<b>Loading</b>} />)
-    void (<Skeleton isLoading name="Ada" label={false} />)
-    void (<Skeleton isLoading name="Ada" label={null} />)
-    void (<SuspenseSkeleton name="Ada" label={false} />)
-    void (<SuspenseSkeleton name="Ada" label={null} />)
-    // @ts-expect-error `true` is not a valid label
-    void (<Skeleton isLoading name="Ada" label={true} />)
-    // @ts-expect-error `true` is not a valid label
-    void (<SuspenseSkeleton name="Ada" label={true} />)
+    void (<Skeleton isLoading name="Ada" loadingLabel="Loading profile" />)
+    void (<Skeleton isLoading name="Ada" loadingLabel={<b>Loading</b>} />)
+    void (<Skeleton isLoading name="Ada" loadingLabel={false} />)
+    void (<Skeleton isLoading name="Ada" loadingLabel={null} />)
+    void (<SuspenseSkeleton name="Ada" loadingLabel={false} />)
+    void (<SuspenseSkeleton name="Ada" loadingLabel={null} />)
+    // @ts-expect-error `true` is not a valid loadingLabel
+    void (<Skeleton isLoading name="Ada" loadingLabel={true} />)
+    // @ts-expect-error `true` is not a valid loadingLabel
+    void (<SuspenseSkeleton name="Ada" loadingLabel={true} />)
     // @ts-expect-error objects are not renderable labels
-    void (<Skeleton isLoading name="Ada" label={{ text: 'Loading' }} />)
+    void (<Skeleton isLoading name="Ada" loadingLabel={{ text: 'Loading' }} />)
   })
 
   it('have the library types on SuspenseSkeleton', () => {
     type Props = SuspenseSkeletonProps<ClashingBonesProps>
-    expectTypeOf<Props['label']>().toEqualTypeOf<SkeletonLabel | undefined>()
+    expectTypeOf<Props['loadingLabel']>().toEqualTypeOf<SkeletonLabel | undefined>()
     expectTypeOf<Props['children']>().toEqualTypeOf<ReactNode | undefined>()
 
-    void (<Clashing.SuspenseSkeleton width={1} label={<b>Loading</b>} />)
+    void (<Clashing.SuspenseSkeleton width={1} loadingLabel={<b>Loading</b>} />)
   })
 
   it('requires `isLoading` on Skeleton', () => {
@@ -160,7 +160,7 @@ describe('reserved props', () => {
 })
 
 describe('Bones declaring reserved props', () => {
-  it('is a compile error for `isLoading`, `always` and `label`, required or optional', () => {
+  it('is a compile error for `isLoading`, `always` and `loadingLabel`, required or optional', () => {
     // @ts-expect-error `isLoading` is reserved
     createSkeleton((_: { width: number; isLoading: boolean }) => null)
     // @ts-expect-error `isLoading` is reserved, even when optional
@@ -169,21 +169,21 @@ describe('Bones declaring reserved props', () => {
     createSkeleton((_: { width: number; always: boolean }) => null)
     // @ts-expect-error `always` is reserved, even when optional
     createSkeleton((_: { width: number; always?: boolean }) => null)
-    // @ts-expect-error `label` is reserved
-    createSkeleton((_: { width: number; label: string }) => null)
-    // @ts-expect-error `label` is reserved, even when optional
-    createSkeleton((_: { width: number; label?: string }) => null)
+    // @ts-expect-error `loadingLabel` is reserved
+    createSkeleton((_: { width: number; loadingLabel: string }) => null)
+    // @ts-expect-error `loadingLabel` is reserved, even when optional
+    createSkeleton((_: { width: number; loadingLabel?: string }) => null)
     // @ts-expect-error several reserved props at once
     createSkeleton(ClashingBones)
   })
 
   it('reports the clashing prop in the error message', () => {
-    expectTypeOf<CheckBones<{ width: number; label?: string }>>().toEqualTypeOf<
-      ReservedPropError<'label'>
+    expectTypeOf<CheckBones<{ width: number; loadingLabel?: string }>>().toEqualTypeOf<
+      ReservedPropError<'loadingLabel'>
     >()
     expectTypeOf<
-      ReservedPropError<'label'>
-    >().toEqualTypeOf<'skully: Bones declares the reserved prop "label". Rename it, e.g. renameProps(Bones, { label: \'newName\' }), rename it in Bones, or wrap Bones yourself.'>()
+      ReservedPropError<'loadingLabel'>
+    >().toEqualTypeOf<'skully: Bones declares the reserved prop "loadingLabel". Rename it, e.g. renameProps(Bones, { loadingLabel: \'newName\' }), rename it in Bones, or wrap Bones yourself.'>()
     // With several clashes, there is exactly one message per clashing prop.
     type TwoClashes = CheckBones<{ isLoading: string; always?: number }>
     expectTypeOf<TwoClashes>().toEqualTypeOf<
@@ -197,6 +197,19 @@ describe('Bones declaring reserved props', () => {
     expectTypeOf<CheckBones<{ width: number; children: ReactNode }>>().toEqualTypeOf<unknown>()
     createSkeleton((_: { width: number; children: ReactNode }) => null)
     createSkeleton((_: { width: number; children?: ReactNode }) => null)
+  })
+
+  it('allows `label`, which is not reserved, and keeps its Bones type', () => {
+    expectTypeOf<CheckBones<{ label: string }>>().toEqualTypeOf<unknown>()
+    expectTypeOf<SkeletonProps<{ label: string }>['label']>().toEqualTypeOf<string>()
+    const Button = createSkeleton((_: { label: string }) => null)
+
+    void (<Button.Skeleton isLoading label="Save" loadingLabel="Saving" />)
+    void (<Button.SuspenseSkeleton label="Save" />)
+    // @ts-expect-error `label` is required on Bones
+    void (<Button.Skeleton isLoading />)
+    // @ts-expect-error `label` keeps Bones' string type
+    void (<Button.Skeleton isLoading label={1} />)
   })
 
   it('allows bones without reserved props', () => {

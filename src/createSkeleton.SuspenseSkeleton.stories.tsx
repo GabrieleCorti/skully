@@ -40,12 +40,12 @@ When content re-suspends, React's rules are the Suspense equivalent of the two \
     },
   },
   args: {
-    label: 'Loading…',
+    loadingLabel: 'Loading…',
     lines: 2,
     compact: false,
   },
   argTypes: {
-    label: {
+    loadingLabel: {
       description:
         'Visually hidden text of the `role="status"` element rendered with the fallback. Accepts any node except `true`; `false` or `null` renders no status element.',
       control: 'text',
@@ -100,13 +100,13 @@ The card reads its user with \`use()\`. On mount it suspends, so the boundary sh
 (with \`lines\`/\`compact\` forwarded) until the 1.2s fake request resolves.
 
 **Try:** press *Reload*. It starts a new request with a plain state update, so React shows the
-fallback again. Change \`label\` and reload to see the announced text change.
+fallback again. Change \`loadingLabel\` and reload to see the announced text change.
 `,
       },
     },
   },
-  render: ({ label, lines, compact }) => (
-    <ReloadDemo label={label} lines={lines} compact={compact} />
+  render: ({ loadingLabel, lines, compact }) => (
+    <ReloadDemo loadingLabel={loadingLabel} lines={lines} compact={compact} />
   ),
 }
 

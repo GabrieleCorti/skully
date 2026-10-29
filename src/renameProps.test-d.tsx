@@ -5,7 +5,7 @@ import { renameProps, type RenamedProps } from './renameProps'
 import type { SkeletonLabel } from './types'
 
 interface BadgeBonesProps {
-  label: string
+  loadingLabel: string
   tone?: 'info' | 'warning'
   lines: number
   ref?: Ref<HTMLDivElement>
@@ -17,7 +17,7 @@ function BadgeBones(_: BadgeBonesProps) {
 
 describe('renameProps types', () => {
   it('renames a required prop, keeping its type and other props', () => {
-    const Renamed = renameProps(BadgeBones, { label: 'badge' })
+    const Renamed = renameProps(BadgeBones, { loadingLabel: 'badge' })
     expectTypeOf(Renamed).toEqualTypeOf<
       ComponentType<{
         badge: string
@@ -28,15 +28,15 @@ describe('renameProps types', () => {
     >()
 
     type Props = ComponentProps<typeof Renamed>
-    expectTypeOf<Props>().not.toHaveProperty('label')
+    expectTypeOf<Props>().not.toHaveProperty('loadingLabel')
     expectTypeOf<Props['badge']>().toEqualTypeOf<string>()
     expectTypeOf<Props['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
 
     void (<Renamed badge="NEW" lines={2} />)
-    // @ts-expect-error `badge` is required, like `label` was
+    // @ts-expect-error `badge` is required, like `loadingLabel` was
     void (<Renamed lines={2} />)
     // @ts-expect-error the old name is gone
-    void (<Renamed badge="NEW" label="NEW" lines={2} />)
+    void (<Renamed badge="NEW" loadingLabel="NEW" lines={2} />)
     // @ts-expect-error `badge` keeps the string type
     void (<Renamed badge={1} lines={2} />)
   })
@@ -45,20 +45,22 @@ describe('renameProps types', () => {
     const Renamed = renameProps(BadgeBones, { tone: 'intent' })
     type Props = ComponentProps<typeof Renamed>
     expectTypeOf<Props>().toEqualTypeOf<{
-      label: string
+      loadingLabel: string
       intent?: 'info' | 'warning'
       lines: number
       ref?: Ref<HTMLDivElement>
     }>()
 
-    void (<Renamed label="NEW" lines={2} />)
-    void (<Renamed label="NEW" lines={2} intent="info" />)
+    void (<Renamed loadingLabel="NEW" lines={2} />)
+    void (<Renamed loadingLabel="NEW" lines={2} intent="info" />)
     // @ts-expect-error `intent` keeps the union type
-    void (<Renamed label="NEW" lines={2} intent="danger" />)
+    void (<Renamed loadingLabel="NEW" lines={2} intent="danger" />)
   })
 
   it('renames several props at once', () => {
-    expectTypeOf<RenamedProps<BadgeBonesProps, { label: 'badge'; lines: 'rows' }>>().toEqualTypeOf<{
+    expectTypeOf<
+      RenamedProps<BadgeBonesProps, { loadingLabel: 'badge'; lines: 'rows' }>
+    >().toEqualTypeOf<{
       badge: string
       tone?: 'info' | 'warning'
       rows: number
@@ -73,41 +75,41 @@ describe('renameProps types', () => {
 
   it('rejects new names that collide with an existing prop', () => {
     // @ts-expect-error `lines` already exists
-    renameProps(BadgeBones, { label: 'lines' })
+    renameProps(BadgeBones, { loadingLabel: 'lines' })
     // @ts-expect-error `ref` already exists
-    renameProps(BadgeBones, { label: 'ref' })
+    renameProps(BadgeBones, { loadingLabel: 'ref' })
   })
 })
 
 describe('renameProps with createSkeleton', () => {
   it('resolves a reserved-prop clash', () => {
-    // @ts-expect-error BadgeBones declares the reserved `label`
+    // @ts-expect-error BadgeBones declares the reserved `loadingLabel`
     createSkeleton(BadgeBones)
 
     const { Skeleton, SuspenseSkeleton } = createSkeleton(
-      renameProps(BadgeBones, { label: 'badge' }),
+      renameProps(BadgeBones, { loadingLabel: 'badge' }),
     )
 
-    void (<Skeleton isLoading badge="NEW" lines={2} label="Loading badge" />)
-    void (<SuspenseSkeleton badge="NEW" lines={2} label={false} />)
+    void (<Skeleton isLoading badge="NEW" lines={2} loadingLabel="Loading badge" />)
+    void (<SuspenseSkeleton badge="NEW" lines={2} loadingLabel={false} />)
     // @ts-expect-error `badge` is required
     void (<Skeleton isLoading lines={2} />)
 
     type Props = ComponentProps<typeof Skeleton>
     expectTypeOf<Props['badge']>().toEqualTypeOf<string>()
-    expectTypeOf<Props['label']>().toEqualTypeOf<SkeletonLabel | undefined>()
+    expectTypeOf<Props['loadingLabel']>().toEqualTypeOf<SkeletonLabel | undefined>()
     expectTypeOf<Props['children']>().toEqualTypeOf<ReactNode | undefined>()
   })
 
   it('errors again when renaming into a reserved name', () => {
     // @ts-expect-error `always` is reserved too
-    createSkeleton(renameProps(BadgeBones, { label: 'always' }))
+    createSkeleton(renameProps(BadgeBones, { loadingLabel: 'always' }))
     // @ts-expect-error `isLoading` is reserved too
     createSkeleton(renameProps(BadgeBones, { tone: 'isLoading' }))
   })
 
   it('keeps the clash error when a different prop is renamed', () => {
-    // @ts-expect-error `label` is still declared
+    // @ts-expect-error `loadingLabel` is still declared
     createSkeleton(renameProps(BadgeBones, { tone: 'intent' }))
   })
 })

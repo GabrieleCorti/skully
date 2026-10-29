@@ -24,13 +24,13 @@ export const { Skeleton: UserCardSkeleton, SuspenseSkeleton: UserCardSuspense } 
   createSkeleton(UserCardBones)
 \`\`\`
 
-- In the default ("initial") mode, the skeleton is shown only until content has been shown once in
-  this instance's lifetime. After that the children always render and handle refetches themselves.
-- With \`always\`, the skeleton is shown whenever \`isLoading\` is true. Pair it with a precise
-  "no data for this item yet" signal such as TanStack Query's \`isPending\`.
+- By default the skeleton only shows on the first load. After that the children stay on screen and
+  have to handle refetches themselves.
+- With \`always\`, the skeleton shows every time \`isLoading\` is true. Pass a "no data yet" flag
+  (for example TanStack Query's \`isPending\`, not \`isFetching\`), or every refetch brings it back.
 - Every prop of the bones (\`lines\`, \`compact\`, \`ref\` here) is accepted and forwarded; the
-  reserved props \`isLoading\`, \`always\`, \`label\` and \`children\` never are.
-- While the skeleton is shown, a visually hidden \`<span role="status">\` carries the \`label\`.
+  reserved props \`isLoading\`, \`always\`, \`loadingLabel\` and \`children\` never are.
+- While the skeleton is shown, a visually hidden \`<span role="status">\` carries the \`loadingLabel\`.
   The dashed box under some examples shows what that element announces.
 `,
       },
@@ -39,7 +39,7 @@ export const { Skeleton: UserCardSkeleton, SuspenseSkeleton: UserCardSuspense } 
   args: {
     isLoading: true,
     always: false,
-    label: 'Loading…',
+    loadingLabel: 'Loading…',
     lines: 2,
     compact: false,
   },
@@ -61,7 +61,7 @@ export const { Skeleton: UserCardSkeleton, SuspenseSkeleton: UserCardSuspense } 
         defaultValue: { summary: 'false' },
       },
     },
-    label: {
+    loadingLabel: {
       description:
         'Visually hidden text of the `role="status"` element rendered next to the bones. Accepts any node except `true` (e.g. a translation component); `false` or `null` renders no status element.',
       control: 'text',
@@ -259,7 +259,7 @@ even though its data was perfectly good. Compare with the previous story.
 }
 
 export const CustomLabel: Story = {
-  args: { label: 'Loading user profile' },
+  args: { loadingLabel: 'Loading user profile' },
   parameters: {
     docs: {
       description: {
@@ -272,13 +272,13 @@ export const CustomLabel: Story = {
 
 export const TranslatedLabelNode: Story = {
   name: 'Label as a node (translation)',
-  args: { label: <span lang="it">Caricamento del profilo…</span> },
+  args: { loadingLabel: <span lang="it">Caricamento del profilo…</span> },
   parameters: {
-    controls: { exclude: ['label'] },
+    controls: { exclude: ['loadingLabel'] },
     docs: {
       description: {
         story:
-          '`label` accepts any `ReactNode`, so you can pass a translation component such as `<Trans id="loading" />`. Here a `<span lang="it">` stands in for one.',
+          '`loadingLabel` accepts any `ReactNode`, so you can pass a translation component such as `<Trans id="loading" />`. Here a `<span lang="it">` stands in for one.',
       },
     },
   },
@@ -286,13 +286,13 @@ export const TranslatedLabelNode: Story = {
 
 export const NoLabel: Story = {
   name: 'No label (decorative)',
-  args: { label: false },
+  args: { loadingLabel: false },
   parameters: {
-    controls: { exclude: ['label'] },
+    controls: { exclude: ['loadingLabel'] },
     docs: {
       description: {
         story:
-          '`label={false}` (or `label={null}`) renders no status element at all. Use it for decorative skeletons, or for areas whose loading state is already announced elsewhere (e.g. a page-level status).',
+          '`loadingLabel={false}` (or `loadingLabel={null}`) renders no status element at all. Use it for decorative skeletons, or for areas whose loading state is already announced elsewhere (e.g. a page-level status).',
       },
     },
   },

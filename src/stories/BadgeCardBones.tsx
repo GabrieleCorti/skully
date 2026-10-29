@@ -3,8 +3,8 @@ import styles from './BadgeCardBones.module.css'
 
 export interface BadgeCardBonesProps {
   /**
-   * Text of the visible ribbon in the card's corner, e.g. "NEW". This is the bones' own
-   * `label`, which clashes with skully's reserved `label` (the hidden status text).
+   * Text of the visible ribbon in the card's corner, e.g. "NEW". Not reserved by skully
+   * (its hidden status text is `loadingLabel`), so it is forwarded like any other prop.
    */
   label: string
   /** Number of text lines to reserve. */
@@ -14,8 +14,7 @@ export interface BadgeCardBonesProps {
 
 /**
  * Card bones with a visible ribbon showing `label`. Decorative only (`aria-hidden`):
- * skully adds the status text. Because it declares `label`, it can't be passed to
- * `createSkeleton` as is; see `badgeSkeletons.ts`.
+ * skully adds the status text. See `badgeSkeletons.ts`.
  */
 export function BadgeCardBones({ label, lines = 2, ref }: BadgeCardBonesProps) {
   return (

@@ -5,48 +5,35 @@ import { StatusInspector } from './demos'
 import styles from './stories.module.css'
 
 const meta = {
-  title: 'Skully/Renaming props',
+  title: 'Skully/Forwarding props',
   component: BadgeCardSkeleton,
   parameters: {
-    controls: { include: ['isLoading', 'label', 'badge'] },
+    controls: { include: ['isLoading', 'loadingLabel', 'label'] },
     docs: {
       description: {
         component: `
-\`isLoading\`, \`always\` and \`label\` belong to skully and are never forwarded to the bones, so
-bones that declare one of them would silently never receive it. \`createSkeleton\` turns that
-silent bug into a compile-time error (\`children\` is allowed):
+Only \`isLoading\`, \`always\`, \`loadingLabel\` and \`children\` belong to skully. Every other
+prop, including one called \`label\`, goes straight to the bones:
 
 \`\`\`tsx
-createSkeleton(BadgeCardBones) // BadgeCardBones has its own \`label\`: the ribbon text
-// skully: Bones declares the reserved prop "label". Rename it, e.g.
-// renameProps(Bones, { label: 'newName' }), rename it in Bones, or wrap Bones yourself.
+// BadgeCardBones has its own \`label\`: the ribbon text
+createSkeleton(BadgeCardBones)
+
+<BadgeCardSkeleton isLoading label="NEW" loadingLabel="Loading card" />
 \`\`\`
 
-Any of these fixes works, and none is preferred:
+"NEW" is drawn in the bones' ribbon, while "Loading card" is skully's hidden status text.
 
-\`\`\`tsx
-// 1. renameProps (used on this page; shows up as Renamed(BadgeCardBones) in DevTools)
-createSkeleton(renameProps(BadgeCardBones, { label: 'badge' }))
-
-// 2. Rename the prop in your bones
-interface BadgeCardBonesProps { badge: string }
-
-// 3. Wrap the bones yourself
-function BadgeCardBonesAdapter({ badge, ...rest }: Omit<BadgeCardBonesProps, 'label'> & { badge: string }) {
-  return <BadgeCardBones label={badge} {...rest} />
-}
-\`\`\`
-
-With fix 1, \`<BadgeCardSkeleton badge="NEW" label="Loading card" />\` draws "NEW" in the bones'
-ribbon, while "Loading card" is skully's hidden status text.
+Bones that declare one of skully's reserved props need a rename instead; see
+[Skully / Renaming props](?path=/docs/skully-renaming-props--docs).
 `,
       },
     },
   },
   args: {
     isLoading: true,
-    label: 'Loading card',
-    badge: 'NEW',
+    loadingLabel: 'Loading card',
+    label: 'NEW',
   },
   argTypes: {
     isLoading: {
@@ -54,15 +41,13 @@ ribbon, while "Loading card" is skully's hidden status text.
       control: 'boolean',
       table: { category: 'skully', type: { summary: 'boolean' } },
     },
-    label: {
-      description:
-        'skully\'s visually hidden `role="status"` text. This is not the bones\' `label`, which is exposed as `badge`.',
+    loadingLabel: {
+      description: 'skully\'s visually hidden `role="status"` text. Never forwarded to the bones.',
       control: 'text',
       table: { category: 'skully', type: { summary: 'SkeletonLabel' } },
     },
-    badge: {
-      description:
-        'Renamed bones prop: forwarded to `BadgeCardBones` as its own `label` (the visible ribbon text).',
+    label: {
+      description: "The bones' own prop: forwarded to `BadgeCardBones` (the visible ribbon text).",
       control: 'text',
       table: { category: 'Bones props (forwarded)', type: { summary: 'string' } },
     },
@@ -71,9 +56,9 @@ ribbon, while "Loading card" is skully's hidden status text.
     <StatusInspector>
       <BadgeCardSkeleton {...args}>
         <BadgeCard
-          title="Renamed props"
-          text="The real content, with its own ribbon drawn from the same badge value."
-          badge={args.badge}
+          title="Forwarded props"
+          text="The real content, with its own ribbon drawn from the same label value."
+          badge={args.label}
         />
       </BadgeCardSkeleton>
     </StatusInspector>
@@ -89,32 +74,32 @@ export const Playground: Story = {
     docs: {
       description: {
         story: `
-**Try:** change \`badge\` and watch the ribbon; change \`label\` and watch the dashed box (what
-screen readers hear). Turn \`isLoading\` off to see the real card in the same space.
+**Try:** change \`label\` and watch the ribbon; change \`loadingLabel\` and watch the dashed box
+(what screen readers hear). Turn \`isLoading\` off to see the real card in the same space.
 `,
       },
     },
   },
 }
 
-export const BadgeVsStatusLabel: Story = {
-  name: 'Badge vs status label',
+export const LabelVsLoadingLabel: Story = {
+  name: 'label vs loadingLabel',
   parameters: {
     controls: { disable: true },
     docs: {
       description: {
         story:
-          'The same skeleton twice: `badge` reaches the bones and is visible, `label` stays with skully and is only announced.',
+          'The same skeleton twice: `label` reaches the bones and is visible, `loadingLabel` stays with skully and is only announced.',
       },
     },
   },
   render: () => (
     <div className={styles.grid}>
       <StatusInspector>
-        <BadgeCardSkeleton isLoading badge="NEW" label="Loading card" />
+        <BadgeCardSkeleton isLoading label="NEW" loadingLabel="Loading card" />
       </StatusInspector>
       <StatusInspector>
-        <BadgeCardSkeleton isLoading badge="SALE" label="Loading offer" />
+        <BadgeCardSkeleton isLoading label="SALE" loadingLabel="Loading offer" />
       </StatusInspector>
     </div>
   ),
