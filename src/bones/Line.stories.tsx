@@ -19,8 +19,8 @@ have to tune margins. It renders a \`<span aria-hidden="true">\` and forwards ev
 including \`ref\`.
 
 \`\`\`tsx
-import { Line } from 'skully/bones'
-import 'skully/bones.css'
+import { Line } from '@gico/skully/bones'
+import '@gico/skully/bones.css'
 \`\`\`
 
 There are no size props; the default styles live in \`@layer skully\`, so your class always wins:

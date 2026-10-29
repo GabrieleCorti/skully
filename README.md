@@ -2,6 +2,10 @@
 
 Skeleton loading for React 19, defined once.
 
+[![CI](https://github.com/GabrieleCorti/skully/actions/workflows/ci.yml/badge.svg)](https://github.com/GabrieleCorti/skully/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@gico/skully)](https://www.npmjs.com/package/@gico/skully)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 [Live Storybook](https://gabrielecorti.github.io/skully/)
 
 Without skully, you write every loading state by hand:
@@ -47,7 +51,7 @@ Write your skeleton UI (the "bones") once, then create its two behaviors:
 ```tsx
 // user-card-skeleton.ts
 'use client'
-import { createSkeleton } from 'skully'
+import { createSkeleton } from '@gico/skully'
 import { UserCardBones } from './UserCardBones'
 
 export const { Skeleton: UserCardSkeleton, SuspenseSkeleton: UserCardSuspense } =
@@ -71,13 +75,13 @@ The generated components accept every prop of `UserCardBones`, including `ref`, 
 If you don't want to write shimmer CSS, build your bones from these primitives. Load their stylesheet once, for example in your root layout:
 
 ```tsx
-import 'skully/bones.css'
+import '@gico/skully/bones.css'
 ```
 
 Then lay them out with your own CSS. In this example the bones reuse the real card's stylesheet, so each `Line` has the same typography as the text it stands in for:
 
 ```tsx
-import { Circle, Line } from 'skully/bones'
+import { Circle, Line } from '@gico/skully/bones'
 import styles from './UserCard.module.css' // the same classes as the real card
 
 export function UserCardBones({ lines = 2 }: UserCardBonesProps) {
@@ -287,7 +291,7 @@ function renameProps<P, M extends { [K in keyof P]?: string }>(
 
 ```tsx
 'use client'
-import { createSkeleton, renameProps } from 'skully'
+import { createSkeleton, renameProps } from '@gico/skully'
 
 export const { Skeleton: CardSkeleton } = createSkeleton(renameProps(CardBones, { label: 'badge' }))
 

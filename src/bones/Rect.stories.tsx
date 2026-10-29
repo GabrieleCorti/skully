@@ -16,8 +16,8 @@ There are no size props: size it with your own \`className\` (the default styles
 forwards every native \`span\` prop, including \`ref\`.
 
 \`\`\`tsx
-import { Rect } from 'skully/bones'
-import 'skully/bones.css'
+import { Rect } from '@gico/skully/bones'
+import '@gico/skully/bones.css'
 \`\`\`
 
 The shimmer and the anti-flash fade-in are disabled under \`prefers-reduced-motion: reduce\`.

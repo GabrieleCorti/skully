@@ -16,8 +16,8 @@ live in \`@layer skully\`, so your class always wins). It is always round, whate
 prop, including \`ref\`.
 
 \`\`\`tsx
-import { Circle } from 'skully/bones'
-import 'skully/bones.css'
+import { Circle } from '@gico/skully/bones'
+import '@gico/skully/bones.css'
 \`\`\`
 
 The shimmer and the anti-flash fade-in are disabled under \`prefers-reduced-motion: reduce\`.
