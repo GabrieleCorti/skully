@@ -1,5 +1,5 @@
 {
-  "name": "skully",
+  "name": "@gico/skully",
   "version": "0.1.0",
   "description": "Headless, child-first skeleton loading for React 19.",
   "license": "MIT",
