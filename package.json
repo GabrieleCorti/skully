@@ -74,7 +74,7 @@
     "react-dom": "^19.3.1",
     "storybook": "^10.6.3",
     "tsup": "^9.0.0",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.0",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
