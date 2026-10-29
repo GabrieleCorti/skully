@@ -39,7 +39,7 @@ Every usage also gets:
 skully is headless. The bones are your own component, and skully adds no layout DOM around them. If you'd rather not write skeleton CSS, the optional [`skully/bones`](#default-bones-skullybones) primitives do it for you.
 
 ```sh
-npm install skully
+npm install @gico/skully
 ```
 
 skully needs `react@^19` and has no runtime dependencies. TypeScript users need `typescript@>=5.3`. On older versions the `renameProps` types widen to `string`, and every prop fails with an unreadable error.
